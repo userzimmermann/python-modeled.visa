@@ -1,0 +1,4 @@
+include COPYING*
+
+include VERSION
+include requirements.txt
