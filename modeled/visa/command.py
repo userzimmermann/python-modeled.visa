@@ -35,8 +35,8 @@ class command(modeled.typed.base):
         string = self.cmdstring
         mtype = self.mtype
 
-        def method(self, **options):
-            return self.ask[mtype](string, **options)
+        def method(self, *args, **options):
+            return self.ask[mtype](string, *args, **options)
 
         ## method.__name__ = self.name
         return method
@@ -56,6 +56,25 @@ class property(with_metaclass(PropertyType, mproperty, command)):
         command.__init__(self, cmdstring)
         mproperty.__init__(self, fget=self.method())
 
+
+class ListProperty(with_metaclass(PropertyType,
+  mproperty.list, property, command
+  )):
+    def __init__(self, cmdstring):
+        command.__init__(self, cmdstring)
+        mproperty.list.__init__(self, fget=self.method())
+
+
+class DictProperty(with_metaclass(PropertyType,
+  mproperty.dict, property, command
+  )):
+    def __init__(self, cmdstring):
+        command.__init__(self, cmdstring)
+        mproperty.list.__init__(self, fget=self.method())
+
+
+property.list = ListProperty
+property.dict = DictProperty
 
 command.property = property
 
