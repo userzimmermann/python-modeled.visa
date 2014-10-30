@@ -53,6 +53,7 @@ class Type(mobject.type):
 
 class Instrument(with_metaclass(Type, mobject)):
     def __init__(self, address, timeout=None):
+        mobject.__init__(self)
         self.visa = visa.instrument(address)
         if timeout is not None:
             self.visa.timeout = timeout
