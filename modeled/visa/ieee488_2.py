@@ -23,5 +23,7 @@ from . import mInstrument, mcmd
 
 
 class IEEE488_2(mInstrument):
+
     ident = mcmd.property[str]('*IDN?')
+
     calibrate = mcmd[int]('*CAL?')
