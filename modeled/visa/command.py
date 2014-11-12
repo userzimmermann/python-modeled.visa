@@ -24,16 +24,17 @@ from six import with_metaclass
 from moretools import cached
 
 import modeled
-from modeled import mproperty
+from modeled import mtuple, mproperty
 
 
 class command(modeled.typed.base):
     def __init__(self, string):
         self.cmdstring = string
 
-    def method(self):
+    def method(self, mtype=None):
         string = self.cmdstring
-        mtype = self.mtype
+        if mtype is None:
+            mtype = self.mtype
 
         def method(self, *args, **options):
             return self.ask[mtype](string, *args, **options)
@@ -45,6 +46,7 @@ class command(modeled.typed.base):
 class PropertyType(mproperty.type):
     @cached
     def __getitem__(cls, mtype):
+        # to disable creation of new __init__ in mproperty.type.__getitem__
         class typedcls(cls):
             pass
 
@@ -65,12 +67,22 @@ class ListProperty(with_metaclass(PropertyType,
         mproperty.list.__init__(self, fget=self.method())
 
 
-class DictProperty(with_metaclass(PropertyType,
+class DictPropertyType(PropertyType, mproperty.dict.type):
+    @cached
+    def __getitem__(cls, mtypes):
+        class typedcls(cls):
+            pass
+
+        return PropertyType.__getitem__(cls, mtuple[mtypes])
+
+
+class DictProperty(with_metaclass(DictPropertyType,
   mproperty.dict, property, command
   )):
     def __init__(self, cmdstring):
         command.__init__(self, cmdstring)
-        mproperty.list.__init__(self, fget=self.method())
+        mproperty.dict.__init__(self,
+          fget=self.method(mtype=self.mvaluetype))
 
 
 property.list = ListProperty
